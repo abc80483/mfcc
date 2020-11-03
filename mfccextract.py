@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sklearn
 
-y, sr = librosa.load('C:/sound/XC62823.wav')
+y, sr = librosa.load('C:/mfcc/XC62823.wav')
 
 print(y.shape)
 move = 20000
@@ -38,7 +38,7 @@ for i in range(1, len(y), move):
 
         threshold = sum / newy.shape[0]
         plotthreshold = np.zeros((50000,1))
-        plotthreshold[,:] = threshold*3
+        plotthreshold[:] = threshold*3
         print(plotthreshold)
         #plt.axhline(y=plotthreshold, linewidth=1, color='k')
         #plt.plot(np.linspace(0, len(newy) / sr, num=len(newy)), plotthreshold, 'r-')
@@ -48,7 +48,7 @@ for i in range(1, len(y), move):
         librosa.display.specshow(mfcc, sr=sr, y_axis='mel', x_axis='time')
         plt.axis('off')
         plt.show()"""
-"""        
+"""
 y = librosa.feature.mfcc(y)
 np.swapaxes(y, 1, 0)
 librosa.display.specshow(y, sr=sr, )

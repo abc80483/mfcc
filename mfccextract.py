@@ -3,59 +3,57 @@ from librosa import display
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn
+import args_practice
+import warnings
 
-y, sr = librosa.load('C:/mfcc/XC62823.wav')
+warnings.filterwarnings("ignore", message="Numerical issues were encountered ")
 
-print(y.shape)
-move = 20000
-segmentation = 50000
+class mfccextract():
+    def __init__(self, move=20000, segmentation=50000):
+        #一次移動距離
+        self.move = move
+        #片段長度
+        self.segmentation = segmentation
+        parser = args_practice.build_arg_parser()
+        args = parser.parse_args()
+        input_folder = args.input_folder
 
-def normalize_audio(audio):
-    audio = audio / np.max(np.abs(audio))
-    return audio
+        if args.extract == "mfcc":
+            pass
+        elif args.extract == "fft":
+            pass
+        else:
+            print("-ex or --extract only support fft and mfcc!")
+            exit()
+        labels = args_practice.get_label(input_folder)
+        files = args_practice.filename(self.move, self.segmentation, input_folder)
 
-"""for i in range(1, len(y), move):
-    newy = y[i:i+segmentation]
-    newy = librosa.feature.mfcc(newy, n_mels=64, fmax=8000)
-    plt.figure(figsize=(20,5))
-    librosa.display.specshow(newy, sr=sr, y_axis='mel', x_axis='time', fmax=8000)
-    plt.tight_layout()
-    plt.show()"""
+        self.files = []
+        for f in files:
+            f = f.replace("\\", "/")
+            self.files.append(f)
 
-y = normalize_audio(y)
+        print(self.files)
 
-for i in range(1, len(y), move):
-    if(i+segmentation<y.shape[0]):
-        newy = y[i:i + segmentation]
-        mfcc = librosa.feature.mfcc(newy, n_mels=40, fmax=80000)
-        newmfcc = sklearn.preprocessing.scale(mfcc, axis=1)
-        plt.figure(figsize=(5, 4))
-        plt.plot(np.linspace(0, len(newy) / sr, num=len(newy)), newy)
+        self.extract()
 
-        sum = 0
-        for j in newy:
-            sum += abs(j)
+    def extract(self):
+        for absfile in self.files:
+            y, sr = librosa.load(absfile)
+            y = args_practice.normalize_audio(y)
 
-        threshold = sum / newy.shape[0]
-        plotthreshold = np.zeros((50000,1))
-        plotthreshold[:] = threshold*3
-        print(plotthreshold)
-        #plt.axhline(y=plotthreshold, linewidth=1, color='k')
-        #plt.plot(np.linspace(0, len(newy) / sr, num=len(newy)), plotthreshold, 'r-')
-        plt.grid(True)
-        plt.show()
-        """plt.figure(figsize=(5, 4))
-        librosa.display.specshow(mfcc, sr=sr, y_axis='mel', x_axis='time')
-        plt.axis('off')
-        plt.show()"""
-"""
-y = librosa.feature.mfcc(y)
-np.swapaxes(y, 1, 0)
-librosa.display.specshow(y, sr=sr, )
+            for i in range(1, len(y), self.move):
+                if(i+self.segmentation<y.shape[0]):
+                    newy = y[i:i + self.segmentation]
+                    #mfcc = librosa.feature.mfcc(newy, n_mels=40, fmax=80000)
+                    #newmfcc = sklearn.preprocessing.scale(mfcc, axis=1)
+                    plt.clf()
+                    plt.axis("off")
+                    plt.plot(np.linspace(0, len(newy) / sr, num=len(newy)), newy)
+                    plt.savefig('amptitude'+str(i)+".png")
+                    print("save!")
 
-plt.colorbar(format='%+2.0f dB')
-plt.figure()
-plt.plot(y)
-plt.title("mfcc")
-plt.show()
-"""
+
+
+if __name__ == '__main__':
+    ok = mfccextract()

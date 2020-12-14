@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 from scipy.io import wavfile
 from hmmlearn import hmm
+from python_speech_features import mfcc
 
 
 def build_arg_parser():
@@ -25,7 +26,7 @@ class HMMTrainer(object):
                                          covariance_type=self.conv_type, n_iter=self.n_iter)
         else:
             raise TypeError('Invalid model type')
-    
+
     def train(self, X):
         np.seterr(all='ignore')
         self.models.append(self.model.fit(X))
@@ -49,7 +50,7 @@ if __name__=='__main__':
         
         X = np.array([])
         y_words = []
-        warning.filterwarnings("ignore")
+        warnings.filterwarnings("ignore")
         for filename in [x for x in os.listdir(subfolder) if x.endswith('.wav')][:-1]:
             #read the input data
             filepath = os.path.join(subfolder, filename)
@@ -70,7 +71,7 @@ if __name__=='__main__':
         hmm_trainer = None
         
     input_files = [
-        
+        ""
         ]
     
     for input_file in input_files:
@@ -88,4 +89,4 @@ if __name__=='__main__':
                 max_score = score
                 output_label = label
 
-        print( "\nTrue", input_file[input_file,find('/')])
+        print( "\nTrue", input_file[input_file.find('/')])

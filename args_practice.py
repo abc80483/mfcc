@@ -35,5 +35,6 @@ def filename(move, segmentation, dir):
         for f in file:
             absfile = os.path.join(root, f)
             if absfile.endswith(".wav"):
+                absfile = absfile.replace("\\", "/")
                 files.append(absfile)
     return files

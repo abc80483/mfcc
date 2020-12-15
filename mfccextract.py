@@ -8,11 +8,14 @@ import warnings
 
 warnings.filterwarnings("ignore", message="Numerical issues were encountered ")
 
-class mfccextract():
-    def __init__(self, move=20000, segmentation=50000):
-        #一次移動距離
+#一次移動距離
+move = 20000
+#片段長度
+segmentation = 50000
+
+class mfccextract:
+    def __init__(self, move, segmentation):
         self.move = move
-        #片段長度
         self.segmentation = segmentation
         parser = args_practice.build_arg_parser()
         args = parser.parse_args()
@@ -26,13 +29,7 @@ class mfccextract():
             print("-ex or --extract only support fft and mfcc!")
             exit()
         labels = args_practice.get_label(input_folder)
-        files = args_practice.filename(self.move, self.segmentation, input_folder)
-
-        self.files = []
-        for f in files:
-            f = f.replace("\\", "/")
-            self.files.append(f)
-
+        self.files = args_practice.filename(self.move, self.segmentation, input_folder)
         print(self.files)
 
         self.extract()
@@ -45,15 +42,17 @@ class mfccextract():
             for i in range(1, len(y), self.move):
                 if(i+self.segmentation<y.shape[0]):
                     newy = y[i:i + self.segmentation]
-                    #mfcc = librosa.feature.mfcc(newy, n_mels=40, fmax=80000)
-                    #newmfcc = sklearn.preprocessing.scale(mfcc, axis=1)
+                    mfcc = librosa.feature.mfcc(newy, n_mels=40, fmax=80000)
+                    newmfcc = sklearn.preprocessing.scale(mfcc, axis=1)
+                    plt.figure(figsize=(5, 4))
                     plt.clf()
+                    librosa.display.specshow(newmfcc)
                     plt.axis("off")
-                    plt.plot(np.linspace(0, len(newy) / sr, num=len(newy)), newy)
+                    #plt.plot(np.linspace(0, len(newy) / sr, num=len(newy)), newy)
                     plt.savefig('amptitude'+str(i)+".png")
-                    print("save!")
+                    print("\"amptitude"+str(i)+".png\""+" has been save!")
 
 
 
 if __name__ == '__main__':
-    ok = mfccextract()
+    ok = mfccextract(move, segmentation)

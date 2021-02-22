@@ -22,6 +22,7 @@ def build_arg_parser():
     return parser
 
 def get_label(input_folder):
+    #將聲音檔案的資料夾當成類別的標籤回傳
     if not input_folder.endswith("/"):
         input_folder = input_folder+"/"
 
@@ -40,6 +41,7 @@ def normalize_audio(audio):
     return audio
 
 def filename(dir):
+    #使用一個list來存所有wav檔的檔名
     files = []
     for root, _, file in os.walk(dir):
         for f in file:

@@ -6,8 +6,9 @@ import numpy as np
 import sklearn
 import warnings
 import os
+from iot.use.detect2 import _median, record
 warnings.filterwarnings("ignore", message="Numerical issues were encountered ")
-
+#建議一次只轉換一種類別的聲音，以免因為聲音檔損毀而無法得知轉換的進度
 #一次移動距離
 move = 20000
 #片段長度
@@ -83,26 +84,14 @@ class mfccextract:
                     bird = label
             y, sr = librosa.load(absfile)
 
-            y = normalize_audio(y)
+            #y = normalize_audio(y)
 
-            for i in range(1, len(y), self.move):
-                if(i+self.segmentation<y.shape[0]):
-                    newy = y[i:i + self.segmentation]
+            print(len(y))
+            mid = _median(y)
+            print(mid)
+            record(y, mid)
 
-                    if self.ex == "mfcc":
-                        spec = librosa.feature.mfcc(newy, n_mels=40, fmax=80000)
-                    elif self.ex == "fft":
-                        spec = np.abs(core.stft(newy))
 
-                    newspec = sklearn.preprocessing.scale(spec, axis=1)
-                    plt.figure(figsize=(5, 4))
-                    plt.clf()
-                    librosa.display.specshow(newspec)
-                    plt.axis("off")
-                    #plt.plot(np.linspace(0, len(newy) / sr, num=len(newy)), newy)
-
-                    plt.savefig(path+"/"+bird+"_"+str(i)+".png")
-                    print("\""+bird+"_"+str(i)+".png\""+" has been saved!")
 
 
 

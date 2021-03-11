@@ -22,14 +22,15 @@ Fs = 44100
 def plot_spec(spec, filename):
     plt.clf()
 
-    spec = scale(spec, axis=1)#********************************
-    cmap = LinearSegmentedColormap.from_list("", ["#007979", "#00A600", "#9AFF02", "#FFFFFF", "#FF0000"])
+    #spec = scale(spec, axis=1)#********************************
+    #cmap = LinearSegmentedColormap.from_list("", ["#007979", "#00A600", "#9AFF02", "#FFFFFF", "#FF0000"])
+    cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000", "#000000"])
     norm = plt.Normalize(-10, 30)
 
     plt.axis('off')
 
-    #plt.imshow(spec[::-1], cmap=cmap, norm=norm, aspect='auto')
-    plt.imshow(spec[::-1], cmap=cmap, aspect='auto')
+    plt.imshow(spec[::-1], cmap=cmap, norm=norm, aspect='auto')
+    #plt.imshow(spec[::-1], cmap=cmap, aspect='auto')
     #plt.imshow(spec[::-1], norm=norm, aspect='auto')
     #plt.imshow(spec[::-1], aspect='auto')
 
@@ -119,10 +120,11 @@ def record(sound, mid, absfile):
         fftdata1 = _fft(sound[i])
         fftdata1 = weight_spec.spec(fftdata1)
         #print(np.max(fftdata2))
-
+        
         if i == len(sound)-1 and voice==True:
             voice = False
-            get_mfcc_frame(sound, framestart, checkstart, absfile)
+            if i-framestart >= 7168:#聲音如果太短就不要做圖
+                get_mfcc_frame(sound, framestart, checkstart, absfile)
 
         if np.max(fftdata1) > mid*3 and voice is False:
             print("start!!!!")
@@ -131,15 +133,20 @@ def record(sound, mid, absfile):
 
         elif np.max(fftdata1) < mid*3 and voice is True:
             
+            if i-framestart > 47140:#圖片太長就切段
+                voice = False
+                get_mfcc_frame(sound, framestart, checkstart, absfile)
+            
             if endstart is True:
                 checkstart = i#開始計算0.6秒
                 endstart = False
 
             checkend = i#0.6秒的最後
             cunt = checkend-checkstart
-            if cunt > 5120:#原本為23552
+            if cunt > 23552:#原本為23552
                 voice = False
-                get_mfcc_frame(sound, framestart, checkstart, absfile)
+                if i-framestart >= 7168:#聲音如果太短就不要做圖
+                    get_mfcc_frame(sound, framestart, checkstart, absfile)
                
         else:
             endstart = True

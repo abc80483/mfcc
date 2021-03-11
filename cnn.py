@@ -9,12 +9,13 @@ from keras.optimizers import Adam
 #load the MNIST dataset from keras datasets
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
+print(np.ndim(X_train))
 #Process data
 X_train = X_train.reshape(-1, 28, 28, 1) # Expend dimension for 1 cahnnel image
 X_test = X_test.reshape(-1, 28, 28, 1)  # Expend dimension for 1 cahnnel image
 X_train = X_train / 255 # Normalize
 X_test = X_test / 255 # Normalize
-
+print(X_train.shape[0])
 #One hot encoding
 y_train = np_utils.to_categorical(y_train, num_classes=10)
 y_test = np_utils.to_categorical(y_test, num_classes=10)

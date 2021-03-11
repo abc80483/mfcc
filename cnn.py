@@ -1,5 +1,6 @@
 import numpy as np
 import keras
+from keras.models import load_model
 from keras.datasets import mnist
 from keras.utils import np_utils
 from keras.models import Sequential
@@ -49,14 +50,14 @@ LetNet_model.summary()
 LetNet_model.compile(optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08),loss = 'categorical_crossentropy',metrics=['accuracy'])
 
 #Strat training
-History = LetNet_model.fit(X_train, y_train, epochs=5, batch_size=32,validation_data=(X_test, y_test))
+History = LetNet_model.fit(X_train, y_train, epochs=10, batch_size=16,validation_data=(X_test, y_test))
 
 #Plot Loss and accuracy
 import matplotlib.pyplot as plt
 plt.figure(figsize = (15,5))
 plt.subplot(1,2,1)
-plt.plot(History.history['acc'])
-plt.plot(History.history['val_acc'])
+plt.plot(History.history['accuracy'])
+plt.plot(History.history['val_accuracy'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
@@ -71,3 +72,5 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 plt.show()
+
+LetNet_model.save("test.h5")

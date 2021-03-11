@@ -6,7 +6,8 @@ import numpy as np
 import sklearn
 import warnings
 import os
-from iot.use.detect2 import _median, record
+from detect2 import _median, record
+
 warnings.filterwarnings("ignore", message="Numerical issues were encountered ")
 #建議一次只轉換一種類別的聲音，以免因為聲音檔損毀而無法得知轉換的進度
 #一次移動距離
@@ -18,7 +19,7 @@ def build_arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-in","--input-folder", dest="input_folder", required=False,
                         help="Input folder directory", default=".")
-    parser.add_argument("-ex","--extract", dest="extract", required=True,
+    parser.add_argument("-ex","--extract", dest="extract", required=False,
                         help="choose mfcc or fft")
     return parser
 
@@ -59,24 +60,22 @@ class mfccextract:
         parser = build_arg_parser()
         args = parser.parse_args()
         input_folder = args.input_folder
-
-        if args.extract == "mfcc":
-            self.ex = "mfcc"
-        elif args.extract == "fft":
-            self.ex = "fft"
-        else:
-            print("-ex or --extract only support fft and mfcc!")
-            exit()
+        
+        if args.extract != None:
+            if args.extract == "mfcc":
+                self.ex = "mfcc"
+            elif args.extract == "fft":
+                self.ex = "fft"
+            else:
+                print("-ex or --extract only support fft and mfcc!")
+                exit()
 
         self.labels = get_label(input_folder)
         self.files = filename(input_folder)
         print(self.files)
 
     def extract(self):
-        path = "dataset"
 
-        if not os.path.exists(path):
-            os.mkdir(path)
         for absfile in self.files:
             bird = ""
             for label in self.labels:
@@ -89,7 +88,7 @@ class mfccextract:
             print(len(y))
             mid = _median(y)
             print(mid)
-            record(y, mid)
+            record(y, mid, absfile)
 
 
 

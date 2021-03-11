@@ -39,7 +39,7 @@ def normalize_audio(audio):
     audio = audio / np.max(np.abs(audio))
     return audio
 
-def filename(dir):
+def filename(move, segmentation, dir):
     files = []
     for root, _, file in os.walk(dir):
         for f in file:
@@ -66,7 +66,7 @@ class mfccextract:
             exit()
 
         self.labels = get_label(input_folder)
-        self.files = filename(input_folder)
+        self.files = filename(self.move, self.segmentation, input_folder)
         print(self.files)
 
     def extract(self):

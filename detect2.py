@@ -24,8 +24,17 @@ def plot_spec(spec, filename):
 
     #spec = scale(spec, axis=1)#********************************
     #cmap = LinearSegmentedColormap.from_list("", ["#007979", "#00A600", "#9AFF02", "#FFFFFF", "#FF0000"])
-    cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000", "#000000"])
-    norm = plt.Normalize(-10, 30)
+    cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000"])
+
+    """if np.average(spec) > 0:
+        norm = plt.Normalize(-5, 40)
+    elif np.average(spec) < 0 and np.average(spec) > -8:
+        norm = plt.Normalize(-10, 30)
+    else:
+        norm = plt.Normalize(-20, 30)"""
+    norm = plt.Normalize(-5, 30)
+    
+    print(np.max(spec), np.min(spec), np.average(spec), np.median(spec))
 
     plt.axis('off')
 
@@ -92,7 +101,7 @@ def get_mfcc_frame(sound, framestart, checkstart, absfile):
     frames = frames/np.max(abs(frames))
     frames = frames*fmax
 
-    spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=40)
+    spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=80)
     
     dire = absfile[:absfile.rfind("/")]
     filename = absfile[absfile.rfind("/")+1:]
@@ -112,6 +121,7 @@ def record(sound, mid, absfile):
     weight_spec = nine_one_weight_fft()
     voice = False#是否開始錄製
     endstart = True#聲音結束之後的時間點
+    print(absfile)
 
     for i in range(len(sound)):
         #data = stream.read(CHUNK)
@@ -123,17 +133,17 @@ def record(sound, mid, absfile):
         
         if i == len(sound)-1 and voice==True:
             voice = False
-            if i-framestart >= 7168:#聲音如果太短就不要做圖
+            if i-framestart >= 47140:#聲音如果太短就不要做圖
                 get_mfcc_frame(sound, framestart, checkstart, absfile)
 
-        if np.max(fftdata1) > mid*3 and voice is False:
+        if np.max(fftdata1) > mid*6 and voice is False:
             print("start!!!!")
             framestart = i
             voice = True
 
-        elif np.max(fftdata1) < mid*3 and voice is True:
+        elif np.max(fftdata1) < mid*6 and voice is True:
             
-            if i-framestart > 47140:#圖片太長就切段
+            if i-framestart > 61440:#圖片太長就切段
                 voice = False
                 get_mfcc_frame(sound, framestart, checkstart, absfile)
             
@@ -145,7 +155,7 @@ def record(sound, mid, absfile):
             cunt = checkend-checkstart
             if cunt > 23552:#原本為23552
                 voice = False
-                if i-framestart >= 7168:#聲音如果太短就不要做圖
+                if i-framestart >= 47104:#聲音如果太短就不要做圖
                     get_mfcc_frame(sound, framestart, checkstart, absfile)
                
         else:

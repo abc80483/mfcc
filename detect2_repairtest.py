@@ -137,27 +137,31 @@ def record(sound, mid, absfile):
                 get_mfcc_frame(sound, framestart, checkstart, absfile)
 
         if np.max(fftdata1) > mid*6 and voice is False:
+
             print("start!!!!")
             framestart = i
             voice = True
 
-        elif np.max(fftdata1) < mid*6 and voice is True:
-            
+        elif voice is True:
+
             if i-framestart > 61440:#圖片太長就切段
                 voice = False
                 get_mfcc_frame(sound, framestart, checkstart, absfile)
-            
-            if endstart is True:
-                checkstart = i#開始計算0.6秒
-                endstart = False
 
-            checkend = i#0.6秒的最後
-            cunt = checkend-checkstart
-            if cunt > 23552:#原本為23552
-                voice = False
-                if i-framestart >= 47104:#聲音如果太短就不要做圖
-                    get_mfcc_frame(sound, framestart, checkstart, absfile)
-               
+            if np.max(fftdata1) < mid*6:
+                            
+                if endstart is True:
+                    checkstart = i#開始計算0.6秒
+                    endstart = False
+
+                checkend = i#0.6秒的最後
+                cunt = checkend-checkstart
+
+                if cunt > 23552:#原本為23552
+                    voice = False
+                    if i-framestart >= 47104:#聲音如果太短就不要做圖
+                        get_mfcc_frame(sound, framestart, checkstart, absfile)
+                
         else:
             endstart = True
 

@@ -6,7 +6,7 @@ import numpy as np
 import sklearn
 import warnings
 import os
-from detect2 import _median, record
+from detect2_repairtest import _median, record
 
 warnings.filterwarnings("ignore", message="Numerical issues were encountered ")
 #建議一次只轉換一種類別的聲音，以免因為聲音檔損毀而無法得知轉換的進度

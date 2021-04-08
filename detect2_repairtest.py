@@ -17,7 +17,7 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
 
-Fs = 44100
+Fs = 22050
 
 def plot_spec(spec, filename):
     plt.clf()
@@ -86,7 +86,7 @@ def _median(sound):#找中位數
     for i in range(len(sound)):
 
         fftdata1 = _fft(sound[i])
-        fftdata1 = weight_spec_mid.spec(fftdata1)
+        #fftdata1 = weight_spec_mid.spec(fftdata1)
         if i%10 == 0:
             sound_median.append(fftdata1)
 
@@ -128,7 +128,7 @@ def record(sound, mid, absfile):
         #dataInt = struct.unpack(str(CHUNK) + 'h', data)
         #fft_spec
         fftdata1 = _fft(sound[i])
-        fftdata1 = weight_spec.spec(fftdata1)
+        #fftdata1 = weight_spec.spec(fftdata1)
         #print(np.max(fftdata2))
         
         if i == len(sound)-1 and voice==True:

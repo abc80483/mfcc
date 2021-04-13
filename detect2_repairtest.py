@@ -133,7 +133,7 @@ def record(sound, mid, absfile):
         
         if i == len(sound)-1 and voice==True:
             voice = False
-            if i-framestart >= Fs*5:#聲音如果太短就不要做圖
+            if i-framestart >= Fs*5.5:#聲音如果太短就不要做圖
                 get_mfcc_frame(sound, framestart, checkstart, absfile)
             else:
                 print("at the last, too short!!")
@@ -163,6 +163,8 @@ def record(sound, mid, absfile):
                     voice = False
                     if i-framestart >= Fs*3:#聲音如果太短就不要做圖
                         get_mfcc_frame(sound, framestart, framestart+Fs*6, absfile)
+                    else:
+                        print("sound is too short!")
                 
             else:
                 endstart = True

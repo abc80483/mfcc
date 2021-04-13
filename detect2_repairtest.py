@@ -24,7 +24,7 @@ def plot_spec(spec, filename):
 
     #spec = scale(spec, axis=1)#********************************
     #cmap = LinearSegmentedColormap.from_list("", ["#007979", "#00A600", "#9AFF02", "#FFFFFF", "#FF0000"])
-    cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000"])
+    cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "000000", "#000000", "#000000"])
 
     """if np.average(spec) > 0:
         norm = plt.Normalize(-5, 40)
@@ -86,7 +86,7 @@ def _median(sound):#找中位數
     for i in range(len(sound)):
 
         fftdata1 = _fft(sound[i])
-        #fftdata1 = weight_spec_mid.spec(fftdata1)
+        fftdata1 = weight_spec_mid.spec(fftdata1)
         if i%10 == 0:
             sound_median.append(fftdata1)
 
@@ -101,7 +101,7 @@ def get_mfcc_frame(sound, framestart, checkstart, absfile):
     frames = frames/np.max(abs(frames))
     frames = frames*fmax
 
-    spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=80)
+    spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=40)
     
     dire = absfile[:absfile.rfind("/")]
     filename = absfile[absfile.rfind("/")+1:]
@@ -128,12 +128,12 @@ def record(sound, mid, absfile):
         #dataInt = struct.unpack(str(CHUNK) + 'h', data)
         #fft_spec
         fftdata1 = _fft(sound[i])
-        #fftdata1 = weight_spec.spec(fftdata1)
+        fftdata1 = weight_spec.spec(fftdata1)
         #print(np.max(fftdata2))
         
         if i == len(sound)-1 and voice==True:
             voice = False
-            if i-framestart >= 47104:#聲音如果太短就不要做圖
+            if i-framestart >= Fs*5:#聲音如果太短就不要做圖
                 get_mfcc_frame(sound, framestart, checkstart, absfile)
             else:
                 print("at the last, too short!!")
@@ -146,7 +146,7 @@ def record(sound, mid, absfile):
 
         elif voice is True:
 
-            if i-framestart > 61440:#圖片太長就切段
+            if i-framestart > Fs*6:#圖片太長就切段
                 voice = False
                 get_mfcc_frame(sound, framestart, checkstart, absfile)
                 print("cut!!")
@@ -159,9 +159,9 @@ def record(sound, mid, absfile):
                 checkend = i#0.6秒的最後
                 cunt = checkend-checkstart
 
-                if cunt > 23552:#原本23552為1.2秒
+                if cunt > Fs*0.6:#原本23552為1.2秒
                     voice = False
-                    if i-framestart >= 47104:#聲音如果太短就不要做圖
+                    if i-framestart >= Fs*5:#聲音如果太短就不要做圖
                         get_mfcc_frame(sound, framestart, checkstart, absfile)
                     else:
                         print("too short!!")

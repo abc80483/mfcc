@@ -161,10 +161,8 @@ def record(sound, mid, absfile):
 
                 if cunt > Fs*0.6:#原本23552為1.2秒
                     voice = False
-                    if i-framestart >= Fs*5:#聲音如果太短就不要做圖
-                        get_mfcc_frame(sound, framestart, checkstart, absfile)
-                    else:
-                        print("too short!!")
+                    if i-framestart >= Fs*3:#聲音如果太短就不要做圖
+                        get_mfcc_frame(sound, framestart, framestart+Fs*6, absfile)
                 
             else:
                 endstart = True

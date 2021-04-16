@@ -24,7 +24,7 @@ def plot_spec(spec, filename):
 
     #spec = scale(spec, axis=1)#********************************
     #cmap = LinearSegmentedColormap.from_list("", ["#007979", "#00A600", "#9AFF02", "#FFFFFF", "#FF0000"])
-    cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "000000", "#000000", "#000000"])
+    cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000"])
 
     """if np.average(spec) > 0:
         norm = plt.Normalize(-5, 40)
@@ -159,9 +159,9 @@ def record(sound, mid, absfile):
                 checkend = i#0.6秒的最後
                 cunt = checkend-checkstart
 
-                if cunt > Fs*0.6:#原本23552為1.2秒
+                if cunt > Fs*1:#原本23552為1.2秒
                     voice = False
-                    if i-framestart >= Fs*3:#聲音如果太短就不要做圖
+                    if i-framestart >= Fs*2:#聲音如果太短就不要做圖
                         get_mfcc_frame(sound, framestart, framestart+Fs*6, absfile)
                     else:
                         print("sound is too short!")

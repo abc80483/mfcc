@@ -4,6 +4,7 @@ from tensorflow.python.keras.layers import Flatten, Dense, Dropout
 from tensorflow.python.keras.applications.resnet50 import ResNet50
 from tensorflow.python.keras.optimizers import Adam
 from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
+import tensorflow as tf
 
 import dill
 import matplotlib.pyplot as plt
@@ -18,13 +19,13 @@ IMAGE_SIZE = (224, 224)
 NUM_CLASSES = 5
 
 # 若 GPU 記憶體不足，可調降 batch size 或凍結更多層網路
-BATCH_SIZE = 4
+BATCH_SIZE = 8
 
 # 凍結網路層數
 FREEZE_LAYERS = 2
 
 # Epoch 數
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 
 # 模型輸出儲存的檔案
 WEIGHTS_FINAL = 'model-resnet50-final.h5'
@@ -46,6 +47,18 @@ valid_batches = train_datagen.flow_from_directory(r'C:\Users\user\Documents/trai
                                                   shuffle=True,
                                                   batch_size=BATCH_SIZE,
                                                   subset='validation')
+
+
+model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    r'C:/Users/user/Documents/model.h5',
+    monitor="val_loss",
+    verbose=0,
+    save_best_only=True,
+    save_weights_only=False,
+    mode="auto",
+    save_freq="epoch",
+    options=None
+)
 
 # 輸出各類別的索引值
 for cls, idx in train_batches.class_indices.items():
@@ -86,23 +99,24 @@ history = net_final.fit_generator(train_batches,
                         steps_per_epoch = train_batches.samples // BATCH_SIZE,
                         validation_data = valid_batches,
                         validation_steps = valid_batches.samples // BATCH_SIZE,
-                        epochs = NUM_EPOCHS)
+                        epochs = NUM_EPOCHS,
+                        callbacks = [model_checkpoint_callback])
 
 data_file_path = r'C:\Users\user\Documents\history.pkl'
 
 
 plt.figure(figsize = (15,5))
 plt.subplot(1,2,1)
-plt.plot(range(1, 11), history.history['acc'])
-plt.plot(range(1, 11), history.history['val_acc'])
+plt.plot(range(1, NUM_EPOCHS+1), history.history['acc'])
+plt.plot(range(1, NUM_EPOCHS+1), history.history['val_acc'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'val'], loc='upper left')
 
 plt.subplot(1,2,2)
-plt.plot(range(1, 11), history.history['loss'])
-plt.plot(range(1, 11), history.history['val_loss'])
+plt.plot(range(1, NUM_EPOCHS+1), history.history['loss'])
+plt.plot(range(1, NUM_EPOCHS+1), history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')

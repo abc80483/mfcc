@@ -36,9 +36,7 @@ def plot_spec(spec, filename):
     
     print(np.max(spec), np.min(spec), np.average(spec), np.median(spec))
 
-    #plt.axis('off')
-    gca = plt.gca()
-    gca = gca.invert_yaxis()
+    plt.axes().get_yaxis().set_visible(False)
     plt.ylabel('filter bank')
     plt.xlabel('time')
     plt.imshow(spec[::-1], cmap=cmap, norm=norm, aspect='auto')

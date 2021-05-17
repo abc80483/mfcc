@@ -178,9 +178,10 @@ class get_mfcc_frame():
                 for j in range(10000):
                     if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
                         
+                        print(self.p.arr.shape)
                         plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
-                        self.count = 0
-                        self.p.arr = np.array([])
+                        self.count -= 1
+                        self.p.arr = self.p.arr[:,130:]
                         print("mfcc saved!!!")
                         break
 

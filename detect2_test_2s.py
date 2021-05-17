@@ -158,13 +158,14 @@ class get_mfcc_frame():
         #print('pic shape:', pic.shape[0])
 
         specfilter = list(np.mean(spec, 1))
-        specfilterarr = [specfilter.copy()]
-        for i in range(129):
+        print("spec", np.array(spec).shape)
+        specfilterarr = [copy.deepcopy(specfilter)]
+        for i in range(1, np.array(spec).shape[-1]):
             specfilterarr.append(specfilter)
         specfilterarr = np.array(specfilterarr).T
-
+        print("specfilterarr", np.array(specfilterarr).shape)
         spec = spec-specfilterarr
-        
+
         if self.p.size() == 0:
             self.p.arr = copy.deepcopy(spec)
             print(self.p.shape())

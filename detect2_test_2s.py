@@ -21,8 +21,12 @@ RATE = 44100
 
 Fs = 22050
 atleast_seconds = 1
-record_seconds = 3
+record_seconds = 6
 nosound_seconds = 0.6
+move_seconds = 0.2
+
+picamount = 2
+
 
 
 def plot_spec(spec, filename):
@@ -141,7 +145,10 @@ class get_mfcc_frame():
 
         frames = np.array(frames)
         frames = np.ravel(frames)
+        if frames.size == 0:
+            return
         fmax = np.max(abs(frames))
+        
         frames = frames/np.max(abs(frames))
         frames = frames*fmax
         
@@ -168,21 +175,21 @@ class get_mfcc_frame():
 
         if self.p.size() == 0:
             self.p.arr = copy.deepcopy(spec)
-            print(self.p.shape())
+            print("p.shape",self.p.shape())
             self.count += 1
             
         else:    
             print('spec shape:', spec.shape)
             self.p.append(spec)
             self.count += 1
-            if self.count >= 3:
+            if self.count >= picamount:
                 for j in range(10000):
                     if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
                         
-                        print(self.p.arr.shape)
+                        print("p.shape before plot", self.p.arr.shape)
                         plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
                         self.count -= 1
-                        self.p.arr = self.p.arr[:,130:]
+                        self.p.arr = self.p.arr[:,self.p.shape()[-1]:]
                         print("mfcc saved!!!")
                         break
 
@@ -207,7 +214,7 @@ def record(sound, mid, absfile):
             voice = False
             if i-framestart >= Fs*atleast_seconds:#聲音如果太短就不要做圖
                 print("last save")
-                mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds), len(sound), absfile)
+                mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds)-int(Fs*move_seconds), len(sound)-int(Fs*move_seconds), absfile)
                 
             else:
                 print("at the last, too short!!")
@@ -223,7 +230,7 @@ def record(sound, mid, absfile):
             if i-framestart >= int(Fs*record_seconds):#圖片太長就切段
                 voice = False
                 print("cut!!")
-                mfcc_cls.print_mfcc(sound, framestart, i, absfile)
+                mfcc_cls.print_mfcc(sound, framestart-int(Fs*move_seconds), framestart+int(Fs*record_seconds)-int(Fs*move_seconds), absfile)
                 
 
             elif np.max(fftdata1) < mid*6:
@@ -238,11 +245,11 @@ def record(sound, mid, absfile):
                     voice = False
                     if framestart+int(Fs*record_seconds)<len(sound)-1:
                         print("normal save")
-                        mfcc_cls.print_mfcc(sound, framestart, framestart+int(Fs*record_seconds), absfile)
+                        mfcc_cls.print_mfcc(sound, framestart-int(Fs*move_seconds), framestart+int(Fs*record_seconds)-int(Fs*move_seconds), absfile)
                         
                     else:
                         print("last normal save")
-                        mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds), len(sound)-1, absfile)
+                        mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds)-int(Fs*move_seconds), len(sound)-1-int(Fs*move_seconds), absfile)
                 
             else:
                 endstart = True

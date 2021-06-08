@@ -20,6 +20,9 @@ def filename(dir):
                 if absfile not in files:
                     files.append(absfile)
     return files
+    
+if not os.path.exists(objdir):
+    os.mkdir(objdir)
 
 for i in filename(picsrc):
     label, file = i.split('/')[-2:]

@@ -175,31 +175,31 @@ class get_mfcc_frame():
         print("specfilterarr", np.array(specfilterarr).shape)
         spec = spec-specfilterarr
 
-        if self.p.size() == 0: 
+        if self.count == 0: 
             self.p.arr = copy.deepcopy(spec)
             self.p.piecesrange.append(spec.shape[-1])
             print(spec.shape)
             print("p.shape",self.p.shape())
             self.count += 1
             
-        else:    
+        elif self.count < picamount:
             print('spec shape:', spec.shape)
             self.p.append(spec)
             self.p.piecesrange.append(spec.shape[-1])
             self.count += 1
-            if self.count >= picamount:
-                for j in range(10000):
-                    if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
-                        
-                        print("p.shape before plot", self.p.arr.shape)
-                        plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
-                        self.count -= 1
-                        print(self.p.shape())
-                        self.p.arr = self.p.arr[:,self.p.piecesrange.pop(0):]
-                        print(self.p.shape())
-                        print("mfcc saved!!!")
-                        break
-
+            
+        if self.count >= picamount:
+            for j in range(10000):
+                if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
+                    
+                    print("p.shape before plot", self.p.arr.shape)
+                    plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
+                    self.count -= 1
+                    print(self.p.shape())
+                    self.p.arr = self.p.arr[:,self.p.piecesrange.pop(0):]
+                    print(self.p.shape())
+                    print("mfcc saved!!!")
+                    break
 
 def record(sound, mid, absfile):
     weight_spec = nine_one_weight_fft()

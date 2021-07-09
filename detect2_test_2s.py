@@ -21,8 +21,12 @@ RATE = 44100
 
 Fs = 22050
 atleast_seconds = 1
-record_seconds = 3
+record_seconds = 6
 nosound_seconds = 0.6
+move_seconds = 0.2
+
+picamount = 1
+
 
 
 def plot_spec(spec, filename):
@@ -50,7 +54,7 @@ def plot_spec(spec, filename):
     
     plt.clf()
     #spec = scale(spec, axis=1)#********************************
-    #cmap = LinearSegmentedColormap.from_list("", ["#007979", "#00A600", "#9AFF02", "#FFFFFF", "#FF0000"])
+    #cmap = LinearSegmentedColormap.from_list("", ["#000000", "#0000C6", "#9AFF02", "#FF0000", "#FF0000"])
     cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000", "#000000"])
 
     """if np.average(spec) > 0:
@@ -121,6 +125,7 @@ def _median(sound):#找中位數
 class pic():
     def __init__(self):
         self.arr = np.array([])
+        self.piecesrange = []
     def size(self):
         return self.arr.size
     def shape(self):
@@ -135,57 +140,70 @@ class get_mfcc_frame():
     def __init__(self):
         self.count = 0
         self.p = pic()
+        self.middle_check = 0
         
     def print_mfcc(self, sound, framestart, checkstart, absfile):
-        frames = sound[framestart:checkstart]
+        middle = (checkstart+framestart)/2
+        if self.middle_check < middle-Fs*move_seconds:
+            self.middle_check = middle
+            frames = sound[framestart:checkstart]
 
-        frames = np.array(frames)
-        frames = np.ravel(frames)
-        fmax = np.max(abs(frames))
-        frames = frames/np.max(abs(frames))
-        frames = frames*fmax
-        
-        frames = librosa.effects.preemphasis(frames)
-        spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=40)
-        
-        dire = absfile[:absfile.rfind("/")]
-        filename = absfile[absfile.rfind("/")+1:]
-        
-        
-        if not os.path.exists(dire+"_mfcc"):
-            os.mkdir(dire+"_mfcc")
-        
-        #print('pic shape:', pic.shape[0])
-
-        specfilter = list(np.mean(spec, 1))
-        print("spec", np.array(spec).shape)
-        specfilterarr = [copy.deepcopy(specfilter)]
-        for i in range(1, np.array(spec).shape[-1]):
-            specfilterarr.append(specfilter)
-        specfilterarr = np.array(specfilterarr).T
-        print("specfilterarr", np.array(specfilterarr).shape)
-        spec = spec-specfilterarr
-
-        if self.p.size() == 0:
-            self.p.arr = copy.deepcopy(spec)
-            print(self.p.shape())
-            self.count += 1
+            frames = np.array(frames)
+            frames = np.ravel(frames)
+            if frames.size == 0:
+                return
+            fmax = np.max(abs(frames))
             
-        else:    
-            print('spec shape:', spec.shape)
-            self.p.append(spec)
-            self.count += 1
-            if self.count >= 3:
+            frames = frames/np.max(abs(frames))
+            frames = frames*fmax
+            
+            frames = librosa.effects.preemphasis(frames)
+            spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=40)
+            
+            dire = absfile[:absfile.rfind("/")]
+            filename = absfile[absfile.rfind("/")+1:]
+            
+            
+            if not os.path.exists(dire+"_mfcc"):
+                os.mkdir(dire+"_mfcc")
+            
+            #print('pic shape:', pic.shape[0])
+
+            #平均數，解除低頻雜訊
+            specfilter = list(np.mean(spec, 1))
+            print("spec", np.array(spec).shape)
+            specfilterarr = [copy.deepcopy(specfilter)]
+            for i in range(1, np.array(spec).shape[-1]):
+                specfilterarr.append(specfilter)
+            specfilterarr = np.array(specfilterarr).T
+            print("specfilterarr", np.array(specfilterarr).shape)
+            spec = spec-specfilterarr
+
+            if self.count == 0: 
+                self.p.arr = copy.deepcopy(spec)
+                self.p.piecesrange.append(spec.shape[-1])
+                print(spec.shape)
+                print("p.shape",self.p.shape())
+                self.count += 1
+                
+            elif self.count < picamount:
+                print('spec shape:', spec.shape)
+                self.p.append(spec)
+                self.p.piecesrange.append(spec.shape[-1])
+                self.count += 1
+                
+            if self.count >= picamount:
                 for j in range(10000):
                     if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
                         
-                        print(self.p.arr.shape)
+                        print("p.shape before plot", self.p.arr.shape)
                         plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
                         self.count -= 1
-                        self.p.arr = self.p.arr[:,130:]
+                        print(self.p.shape())
+                        self.p.arr = self.p.arr[:,self.p.piecesrange.pop(0):]
+                        print(self.p.shape())
                         print("mfcc saved!!!")
                         break
-
 
 def record(sound, mid, absfile):
     weight_spec = nine_one_weight_fft()
@@ -207,7 +225,7 @@ def record(sound, mid, absfile):
             voice = False
             if i-framestart >= Fs*atleast_seconds:#聲音如果太短就不要做圖
                 print("last save")
-                mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds), len(sound), absfile)
+                mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds)-int(Fs*move_seconds), len(sound)-int(Fs*move_seconds), absfile)
                 
             else:
                 print("at the last, too short!!")
@@ -223,7 +241,7 @@ def record(sound, mid, absfile):
             if i-framestart >= int(Fs*record_seconds):#圖片太長就切段
                 voice = False
                 print("cut!!")
-                mfcc_cls.print_mfcc(sound, framestart, i, absfile)
+                mfcc_cls.print_mfcc(sound, framestart-int(Fs*move_seconds), framestart+int(Fs*record_seconds)-int(Fs*move_seconds), absfile)
                 
 
             elif np.max(fftdata1) < mid*6:
@@ -238,11 +256,11 @@ def record(sound, mid, absfile):
                     voice = False
                     if framestart+int(Fs*record_seconds)<len(sound)-1:
                         print("normal save")
-                        mfcc_cls.print_mfcc(sound, framestart, framestart+int(Fs*record_seconds), absfile)
+                        mfcc_cls.print_mfcc(sound, framestart-int(Fs*move_seconds), framestart+int(Fs*record_seconds)-int(Fs*move_seconds), absfile)
                         
                     else:
                         print("last normal save")
-                        mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds), len(sound)-1, absfile)
+                        mfcc_cls.print_mfcc(sound, len(sound)-1-int(Fs*record_seconds)-int(Fs*move_seconds), len(sound)-1-int(Fs*move_seconds), absfile)
                 
             else:
                 endstart = True

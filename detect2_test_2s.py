@@ -25,7 +25,7 @@ record_seconds = 6
 nosound_seconds = 0.6
 move_seconds = 0.2
 
-picamount = 2
+picamount = 1
 
 
 
@@ -54,7 +54,7 @@ def plot_spec(spec, filename):
     
     plt.clf()
     #spec = scale(spec, axis=1)#********************************
-    #cmap = LinearSegmentedColormap.from_list("", ["#007979", "#00A600", "#9AFF02", "#FFFFFF", "#FF0000"])
+    #cmap = LinearSegmentedColormap.from_list("", ["#000000", "#0000C6", "#9AFF02", "#FF0000", "#FF0000"])
     cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000", "#000000"])
 
     """if np.average(spec) > 0:
@@ -140,66 +140,70 @@ class get_mfcc_frame():
     def __init__(self):
         self.count = 0
         self.p = pic()
+        self.middle_check = 0
         
     def print_mfcc(self, sound, framestart, checkstart, absfile):
-        frames = sound[framestart:checkstart]
+        middle = (checkstart+framestart)/2
+        if self.middle_check < middle-Fs*move_seconds:
+            self.middle_check = middle
+            frames = sound[framestart:checkstart]
 
-        frames = np.array(frames)
-        frames = np.ravel(frames)
-        if frames.size == 0:
-            return
-        fmax = np.max(abs(frames))
-        
-        frames = frames/np.max(abs(frames))
-        frames = frames*fmax
-        
-        frames = librosa.effects.preemphasis(frames)
-        spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=40)
-        
-        dire = absfile[:absfile.rfind("/")]
-        filename = absfile[absfile.rfind("/")+1:]
-        
-        
-        if not os.path.exists(dire+"_mfcc"):
-            os.mkdir(dire+"_mfcc")
-        
-        #print('pic shape:', pic.shape[0])
-
-        #平均數，解除低頻雜訊
-        specfilter = list(np.mean(spec, 1))
-        print("spec", np.array(spec).shape)
-        specfilterarr = [copy.deepcopy(specfilter)]
-        for i in range(1, np.array(spec).shape[-1]):
-            specfilterarr.append(specfilter)
-        specfilterarr = np.array(specfilterarr).T
-        print("specfilterarr", np.array(specfilterarr).shape)
-        spec = spec-specfilterarr
-
-        if self.count == 0: 
-            self.p.arr = copy.deepcopy(spec)
-            self.p.piecesrange.append(spec.shape[-1])
-            print(spec.shape)
-            print("p.shape",self.p.shape())
-            self.count += 1
+            frames = np.array(frames)
+            frames = np.ravel(frames)
+            if frames.size == 0:
+                return
+            fmax = np.max(abs(frames))
             
-        elif self.count < picamount:
-            print('spec shape:', spec.shape)
-            self.p.append(spec)
-            self.p.piecesrange.append(spec.shape[-1])
-            self.count += 1
+            frames = frames/np.max(abs(frames))
+            frames = frames*fmax
             
-        if self.count >= picamount:
-            for j in range(10000):
-                if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
-                    
-                    print("p.shape before plot", self.p.arr.shape)
-                    plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
-                    self.count -= 1
-                    print(self.p.shape())
-                    self.p.arr = self.p.arr[:,self.p.piecesrange.pop(0):]
-                    print(self.p.shape())
-                    print("mfcc saved!!!")
-                    break
+            frames = librosa.effects.preemphasis(frames)
+            spec = librosa.feature.mfcc(y=frames, sr=Fs,n_mfcc=40)
+            
+            dire = absfile[:absfile.rfind("/")]
+            filename = absfile[absfile.rfind("/")+1:]
+            
+            
+            if not os.path.exists(dire+"_mfcc"):
+                os.mkdir(dire+"_mfcc")
+            
+            #print('pic shape:', pic.shape[0])
+
+            #平均數，解除低頻雜訊
+            specfilter = list(np.mean(spec, 1))
+            print("spec", np.array(spec).shape)
+            specfilterarr = [copy.deepcopy(specfilter)]
+            for i in range(1, np.array(spec).shape[-1]):
+                specfilterarr.append(specfilter)
+            specfilterarr = np.array(specfilterarr).T
+            print("specfilterarr", np.array(specfilterarr).shape)
+            spec = spec-specfilterarr
+
+            if self.count == 0: 
+                self.p.arr = copy.deepcopy(spec)
+                self.p.piecesrange.append(spec.shape[-1])
+                print(spec.shape)
+                print("p.shape",self.p.shape())
+                self.count += 1
+                
+            elif self.count < picamount:
+                print('spec shape:', spec.shape)
+                self.p.append(spec)
+                self.p.piecesrange.append(spec.shape[-1])
+                self.count += 1
+                
+            if self.count >= picamount:
+                for j in range(10000):
+                    if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
+                        
+                        print("p.shape before plot", self.p.arr.shape)
+                        plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
+                        self.count -= 1
+                        print(self.p.shape())
+                        self.p.arr = self.p.arr[:,self.p.piecesrange.pop(0):]
+                        print(self.p.shape())
+                        print("mfcc saved!!!")
+                        break
 
 def record(sound, mid, absfile):
     weight_spec = nine_one_weight_fft()

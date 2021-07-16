@@ -50,11 +50,12 @@ def plot_spec(spec, filename):
     #scale = math.log(scale, 2)
     print("scale:", scale)
     #norm = plt.Normalize(upquan-1, upquan)
-    norm = plt.Normalize(-10, 50)
+    norm = plt.Normalize(0, 30)
     
     plt.clf()
     #spec = scale(spec, axis=1)#********************************
     #cmap = LinearSegmentedColormap.from_list("", ["#000000", "#0000C6", "#9AFF02", "#FF0000", "#FF0000"])
+    #cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#999999", "#666666", "#333333", "#000000"])
     cmap = LinearSegmentedColormap.from_list("", ["#FFFFFF", "#FFFFFF", "#000000", "#000000", "#000000"])
 
     """if np.average(spec) > 0:
@@ -137,10 +138,11 @@ class pic():
 
 class get_mfcc_frame():
     
-    def __init__(self):
+    def __init__(self, FilesCompare):
         self.count = 0
         self.p = pic()
         self.middle_check = 0
+        self.filecompare = FilesCompare
         
     def print_mfcc(self, sound, framestart, checkstart, absfile):
         middle = (checkstart+framestart)/2
@@ -195,9 +197,11 @@ class get_mfcc_frame():
             if self.count >= picamount:
                 for j in range(10000):
                     if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
-                        
                         print("p.shape before plot", self.p.arr.shape)
                         plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
+                        avgarr = np.average(self.p.arr, axis=1)
+                        #flat_list = [item for sublist in self.p.arr for item in sublist]
+                        self.filecompare.compare(avgarr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
                         self.count -= 1
                         print(self.p.shape())
                         self.p.arr = self.p.arr[:,self.p.piecesrange.pop(0):]
@@ -205,9 +209,9 @@ class get_mfcc_frame():
                         print("mfcc saved!!!")
                         break
 
-def record(sound, mid, absfile):
+def record(sound, mid, absfile, FilesCompare):
     weight_spec = nine_one_weight_fft()
-    mfcc_cls = get_mfcc_frame()
+    mfcc_cls = get_mfcc_frame(FilesCompare)
     voice = False#是否開始錄製
     endstart = True#聲音結束之後的時間點
     print(absfile)

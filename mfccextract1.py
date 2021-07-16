@@ -6,7 +6,8 @@ import numpy as np
 import sklearn
 import warnings
 import os
-from detect2_test_2s import _median, record
+from detect2_test_2s_noflat import _median, record
+from splitimageincode import FilesCompare
 
 warnings.filterwarnings("ignore", message="Numerical issues were encountered ")
 #建議一次只轉換一種類別的聲音，以免因為聲音檔損毀而無法得知轉換的進度
@@ -75,20 +76,22 @@ class mfccextract:
         print(self.files)
 
     def extract(self):
-
+        filecompare = FilesCompare()
         for absfile in self.files:
             bird = ""
             for label in self.labels:
                 if absfile.rfind(label)!=-1:
                     bird = label
             y, sr = librosa.load(absfile)
-
+            print(bird)
             #y = normalize_audio(y)
-
+            if bird != filecompare.bird and not filecompare.classes_sequence:
+                filecompare.resetinit()
             print(len(y))
             mid = _median(y)
             print(mid)
-            record(y, mid, absfile)
+            record(y, mid, absfile, filecompare)
+
 
 
 

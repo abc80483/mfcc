@@ -6,7 +6,7 @@ import numpy as np
 import sklearn
 import warnings
 import os
-from detect2_test_2s_noflat import _median, record
+from detect2_test_2s import _median, record
 from splitimageincode import FilesCompare
 
 warnings.filterwarnings("ignore", message="Numerical issues were encountered ")

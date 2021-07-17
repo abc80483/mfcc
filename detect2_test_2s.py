@@ -138,11 +138,10 @@ class pic():
 
 class get_mfcc_frame():
     
-    def __init__(self, FilesCompare):
+    def __init__(self):
         self.count = 0
         self.p = pic()
         self.middle_check = 0
-        self.filecompare = FilesCompare
         
     def print_mfcc(self, sound, framestart, checkstart, absfile):
         middle = (checkstart+framestart)/2
@@ -199,9 +198,6 @@ class get_mfcc_frame():
                     if not os.path.exists(dire+"_mfcc/"+filename+"_"+str(j)+".png"):
                         print("p.shape before plot", self.p.arr.shape)
                         plot_spec(self.p.arr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
-                        avgarr = np.average(self.p.arr, axis=1)
-                        #flat_list = [item for sublist in self.p.arr for item in sublist]
-                        self.filecompare.compare(avgarr, dire+"_mfcc/"+filename+"_"+str(j)+".png")
                         self.count -= 1
                         print(self.p.shape())
                         self.p.arr = self.p.arr[:,self.p.piecesrange.pop(0):]
@@ -209,9 +205,9 @@ class get_mfcc_frame():
                         print("mfcc saved!!!")
                         break
 
-def record(sound, mid, absfile, FilesCompare):
+def record(sound, mid, absfile):
     weight_spec = nine_one_weight_fft()
-    mfcc_cls = get_mfcc_frame(FilesCompare)
+    mfcc_cls = get_mfcc_frame()
     voice = False#是否開始錄製
     endstart = True#聲音結束之後的時間點
     print(absfile)

@@ -170,6 +170,7 @@ class get_mfcc_frame():
             
             #print('pic shape:', pic.shape[0])
 
+            """
             #平均數，解除低頻雜訊
             specfilter = list(np.mean(spec, 1))
             print("spec", np.array(spec).shape)
@@ -179,6 +180,7 @@ class get_mfcc_frame():
             specfilterarr = np.array(specfilterarr).T
             print("specfilterarr", np.array(specfilterarr).shape)
             spec = spec-specfilterarr
+            """
 
             if self.count == 0: 
                 self.p.arr = copy.deepcopy(spec)
